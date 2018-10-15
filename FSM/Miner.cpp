@@ -8,29 +8,34 @@ Miner::Miner(int ID):BaseGameEntity(ID),
 					 m_iGoldCarried(0),
 					 m_iMoneyInBank(0),
 					 m_iThirst(0),
-					 m_iFatigue(0),
-					 m_pCurrentState(GoHomeAndSleepTilRested::Instance())
+					 m_iFatigue(0)
 {
+	m_pStateMachine = new StateMachine<Miner>(this);
+	m_pStateMachine->SetCurrentState(GoHomeAndSleepTilRested::Instance());
 }
+
+Miner::~Miner()
+{
+	delete m_pStateMachine;
+}
+
 
 
 void Miner::Update()
 {
 	m_iThirst += 1;
-	if (m_pCurrentState) {
-		m_pCurrentState->Execute(this);
-	}
+	m_pStateMachine->Update();
 }
 
-void Miner::ChangeState(State * pNewState)
+
+StateMachine<Miner>* Miner::GetFSM() const
 {
-	assert(m_pCurrentState && pNewState);
+	return m_pStateMachine;
+}
 
-	m_pCurrentState->Exit(this);
-
-	m_pCurrentState = pNewState;
-
-	m_pCurrentState->Enter(this);
+bool Miner::HandleMessage(const Telegram & msg)
+{
+	return m_pStateMachine->HandleMessage(msg);
 }
 
 location_type Miner::Location() const

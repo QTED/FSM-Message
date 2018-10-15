@@ -1,12 +1,13 @@
 #pragma once
 #include "BaseGameEntity.h"
 #include "Locations.h"
+#include "MinerOwnedStates.h"
+#include "StateMachine.h"
 
 #include <cassert>
 #include <string>
 
-
-class State;
+struct Telegram;
 
 //矿工感到满足的最小金额
 const int ComfortLevel = 5;
@@ -21,8 +22,9 @@ class Miner :
 	public BaseGameEntity
 {
 private:
-	//指向当前状态的指针
-	State* m_pCurrentState;
+
+	//StateMachine
+	StateMachine<Miner>* m_pStateMachine;
 
 	//矿工当前所处位置
 	location_type m_Location;
@@ -40,12 +42,15 @@ private:
 	int m_iFatigue;
 public:
 	Miner(int ID);
-
+	~Miner();
 	//更新函数
 	void Update();
 
-	//改变当前状态到新的状态
-	void ChangeState(State* pNewState);
+	//获取StatMachine
+	StateMachine<Miner>* GetFSM()const;
+
+	//处理消息
+	virtual bool HandleMessage(const Telegram& msg);
 
 	location_type Location() const;
 	void ChangeLocation(const location_type loc);

@@ -2,6 +2,10 @@
 #include "State.h"
 #include "Miner.h"
 #include "Locations.h"
+#include "Telegram.h"
+#include "MessageDispatcher.h"
+#include "MessageTypes.h"
+#include "CrudeTimer.h"
 #include "EntityNames.h"
 
 #include <iostream>
@@ -38,17 +42,22 @@ void EnterMineAndDigForNugget::Execute(Miner * miner)
 
 	//如果金块数量到达上限，去把金块存入银行
 	if (miner->PocketsFull()) {
-		miner->ChangeState(VisitBankAndDepositNugget::Instance());
+		miner->GetFSM()->ChangeState(VisitBankAndDepositNugget::Instance());
 	}
 
 	if (miner->Thirsty()) {
-		miner->ChangeState(QuenchThirst::Instance());
+		miner->GetFSM()->ChangeState(QuenchThirst::Instance());
 	}
 }
 
 void EnterMineAndDigForNugget::Exit(Miner * miner)
 {
 	cout << "\n" << GetNameOfEntity(miner->ID()) << ": "<< "装满了金块，离开了金矿";
+}
+
+bool EnterMineAndDigForNugget::OnMessage(Miner * miner, const Telegram & msg)
+{
+	return false;
 }
 
 
@@ -85,17 +94,22 @@ void VisitBankAndDepositNugget::Execute(Miner * miner)
 	if (miner->Wealth() >= ComfortLevel) {
 		cout << "\n" << GetNameOfEntity(miner->ID()) << ": "<< "现在足够富有了！. 现在回家吧！";
 
-		miner->ChangeState(GoHomeAndSleepTilRested::Instance());
+		miner->GetFSM()->ChangeState(GoHomeAndSleepTilRested::Instance());
 	}
 	//若不满足，重新挖矿
 	else {
-		miner->ChangeState(EnterMineAndDigForNugget::Instance());
+		miner->GetFSM()->ChangeState(EnterMineAndDigForNugget::Instance());
 	}
 }
 
 void VisitBankAndDepositNugget::Exit(Miner * miner)
 {
 	cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "离开银行";
+}
+
+bool VisitBankAndDepositNugget::OnMessage(Miner * miner, const Telegram & msg)
+{
+	return false;
 }
 
 
@@ -116,6 +130,9 @@ void GoHomeAndSleepTilRested::Enter(Miner * miner)
 		cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "回家！";
 
 		miner->ChangeLocation(shack);
+		
+		//发消息给妻子，通知他矿工回家了
+		Dispatch->DispatchMessage(SEND_MESSAGE_IMMEDIATELY, miner->ID(), ent_Elsa, Msg_HiHoneyImHome, NO_ADDITIONAL_INFO);
 	}
 }
 
@@ -126,7 +143,7 @@ void GoHomeAndSleepTilRested::Execute(Miner * miner)
 	{
 		cout << "\n" << GetNameOfEntity(miner->ID()) << ": "<< "是时候去挖矿了！";
 
-		miner->ChangeState(EnterMineAndDigForNugget::Instance());
+		miner->GetFSM()->ChangeState(EnterMineAndDigForNugget::Instance());
 	}
 	else
 	{
@@ -140,6 +157,20 @@ void GoHomeAndSleepTilRested::Execute(Miner * miner)
 void GoHomeAndSleepTilRested::Exit(Miner * miner)
 {
 	cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "离开家";
+}
+
+bool GoHomeAndSleepTilRested::OnMessage(Miner * miner, const Telegram & msg)
+{
+	switch (msg.Msg)
+	{
+	case Msg_StewReady: {
+		cout << "\n在" << Clock->GetCurrentTime() << "时， " << GetNameOfEntity(miner->ID()) << "处理了消息";
+		cout << "\n" << GetNameOfEntity(miner->ID()) << ": 好的，我要回来了！";
+		miner->GetFSM()->ChangeState(EatStew::Instance());
+		return true;
+	}
+	}
+	return false;
 }
 
 
@@ -171,7 +202,7 @@ void QuenchThirst::Execute(Miner * miner)
 
 		cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "买水喝";
 
-		miner->ChangeState(EnterMineAndDigForNugget::Instance());
+		miner->GetFSM()->ChangeState(EnterMineAndDigForNugget::Instance());
 	}
 
 	else
@@ -183,4 +214,41 @@ void QuenchThirst::Execute(Miner * miner)
 void QuenchThirst::Exit(Miner * miner)
 {
 	cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "离开商店，口不渴了";
+}
+
+bool QuenchThirst::OnMessage(Miner * miner, const Telegram & msg)
+{
+	return false;
+}
+
+
+
+//EatStew
+//
+//
+EatStew * EatStew::Instance()
+{
+	static EatStew instance;
+	return &instance;
+}
+
+void EatStew::Enter(Miner * miner)
+{
+	cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "闻起来很好吃！";
+}
+
+void EatStew::Execute(Miner * miner)
+{
+	cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "尝起来很好吃！";
+	miner->GetFSM()->RevertToPreviousState();
+}
+
+void EatStew::Exit(Miner * miner)
+{
+	cout << "\n" << GetNameOfEntity(miner->ID()) << ": " << "谢谢你， 我要回去工作了！";
+}
+
+bool EatStew::OnMessage(Miner * miner, const Telegram & msg)
+{
+	return false;
 }

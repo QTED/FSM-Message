@@ -27,6 +27,21 @@
     <ClCompile Include="MinerOwnedStates.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MinersWife.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MinersWifeOwnedStates.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageDispatcher.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CrudeTimer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseGameEntity.h">
@@ -45,6 +60,30 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="EntityNames.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MinersWife.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MinersWifeOwnedStates.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Telegram.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageTypes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageDispatcher.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CrudeTimer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

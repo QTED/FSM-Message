@@ -1,18 +1,29 @@
 #include "Locations.h"
 #include "Miner.h"
+#include "MinersWife.h"
+#include "EntityManager.h"
+#include "MessageDispatcher.h"
 #include "EntityNames.h"
 
 
 int main()
 {
-	//create a miner
-	Miner miner(ent_Miner_Bob);
+	Miner* miner = new Miner(ent_Miner_Bob);
+	
+	MinersWife* wife = new MinersWife(ent_Elsa);
 
-	//simply run the miner through a few Update calls
+	EntityMgr->RegisterEntity(miner);
+	EntityMgr->RegisterEntity(wife);
+
 	for (int i = 0; i < 23; ++i)
 	{
-		miner.Update();
+		miner->Update();
+		wife->Update();
+		Dispatch->DispatchDelyedMessage();
 	}
+
+	delete miner;
+	delete wife;
 
 	return 0;
 }

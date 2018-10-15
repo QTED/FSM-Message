@@ -1,4 +1,8 @@
 #pragma once
+
+#include <string>
+#include "Telegram.h"
+
 class BaseGameEntity
 {
 private:
@@ -17,6 +21,9 @@ public:
 
 	//游戏循环调用更新函数
 	virtual void Update() = 0;
+	//消息处理函数
+	virtual bool HandleMessage(const Telegram& msg) = 0;
+
 	int ID() const;
 };
 
